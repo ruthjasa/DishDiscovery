@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+# Keep large raw CSV files off GitHub if needed:
+# data/RAW_recipes.csv
