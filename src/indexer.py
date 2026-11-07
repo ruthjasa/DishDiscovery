@@ -1,4 +1,3 @@
-
 import ast
 import re
 
@@ -7,7 +6,7 @@ from nltk.stem import PorterStemmer
 
 
 class RecipeIndexer:
-    """Loads and preprocesses recipe data for BM25 indexing."""
+    """Divine: Loads and preprocesses recipe data for BM25 indexing."""
 
     def __init__(self, data_path: str, ingredient_weight: int = 3):
         self.data_path = data_path
@@ -20,7 +19,6 @@ class RecipeIndexer:
 
         self.ingredient_weight = ingredient_weight
 
-        # Small built-in stop-word set to avoid downloading NLTK data.
         self.stop_words = {
             "a", "an", "the", "and", "or", "of", "to",
             "in", "on", "for", "with", "at", "by",
