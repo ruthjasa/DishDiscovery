@@ -3,6 +3,8 @@ __pycache__/
 .venv/
 venv/
 .DS_Store
+*.pkl
+data/*.pkl
 
-# Keep large raw CSV files off GitHub:
+# Keep large raw CSV files off GitHub
 data/RAW_recipes.csv
