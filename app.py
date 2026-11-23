@@ -1,5 +1,6 @@
 import os
 import pickle
+import urllib.request
 import streamlit as st
 from src.indexer import RecipeIndexer
 from src.search_engine import RecipeSearch
@@ -70,6 +71,7 @@ st.markdown("""
 
 DATA_FILE = "data/RAW_recipes.csv"
 CACHE_FILE = "data/search_engine.pkl"
+DATASET_URL = "https://github.com/ruthjasa/DishDiscovery/releases/download/v1.0-data/RAW_recipes.csv"
 
 
 @st.cache_resource

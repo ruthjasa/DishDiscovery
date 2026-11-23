@@ -1,4 +1,5 @@
 import ast
+import gc
 import re
 
 import pandas as pd
@@ -62,11 +63,11 @@ class RecipeIndexer:
         """Create weighted token lists for BM25 indexing."""
         self.processed_docs = []
 
-        for _, recipe in self.df.iterrows():
-            title_tokens = self.preprocess_text(recipe["name"])
+        for name, ingredients in zip(self.df["name"], self.df["ingredients"]):
+            title_tokens = self.preprocess_text(name)
 
             ingredient_tokens = []
-            for ingredient in recipe["ingredients"]:
+            for ingredient in ingredients:
                 ingredient_tokens.extend(
                     self.preprocess_text(ingredient)
                 )
@@ -80,12 +81,15 @@ class RecipeIndexer:
 
     def load_and_preprocess(self):
         """Load CSV, clean recipe records, and prepare BM25 documents."""
-        df = pd.read_csv(self.data_path)
-
         required_columns = [
             "id", "name", "minutes",
             "ingredients", "tags", "steps"
         ]
+
+        df = pd.read_csv(
+            self.data_path,
+            usecols=lambda col: col in required_columns
+        )
 
         missing = [
             col for col in required_columns
@@ -95,10 +99,8 @@ class RecipeIndexer:
         if missing:
             raise ValueError(f"Missing required columns: {missing}")
 
-        # Keep only the fields required by the shared contract.
         df = df[required_columns].copy()
 
-        # Convert numeric fields and discard invalid records.
         df["id"] = pd.to_numeric(df["id"], errors="coerce")
         df["minutes"] = pd.to_numeric(
             df["minutes"], errors="coerce"
@@ -112,22 +114,21 @@ class RecipeIndexer:
             & (df["id"] >= 0)
         ].copy()
 
-        df["id"] = df["id"].astype(int)
-        df["minutes"] = df["minutes"].astype(int)
+        df["id"] = df["id"].astype("int32")
+        df["minutes"] = df["minutes"].astype("int32")
 
         df["name"] = df["name"].astype(str).str.strip()
         df = df[df["name"] != ""].copy()
         df = df.drop_duplicates(subset=["id"])
 
-        # Parse stringified lists.
         for column in ["ingredients", "tags", "steps"]:
             df[column] = df[column].apply(self.parse_list)
 
-        # Recipes without usable ingredients cannot be indexed well.
         df = df[df["ingredients"].map(bool)].copy()
 
-        # Reset indices to align DataFrame rows with BM25 scores.
         self.df = df.reset_index(drop=True)
+        del df
+        gc.collect()
 
         self.build_processed_docs()
 
