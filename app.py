@@ -81,14 +81,20 @@ def init_pipeline():
             indexer, search_engine = pickle.load(f)
         return indexer, search_engine
 
+    if not os.path.exists(DATA_FILE):
+        os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+        with st.spinner("Downloading recipe dataset from GitHub Release..."):
+            urllib.request.urlretrieve(DATASET_URL, DATA_FILE)
+
     with st.spinner("Indexing 230k+ recipes for the first time (subsequent launches will take <1s)..."):
         indexer = RecipeIndexer(DATA_FILE)
         indexer.load_and_preprocess()
         search_engine = RecipeSearch(indexer)
 
-        os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
-        with open(CACHE_FILE, "wb") as f:
-            pickle.dump((indexer, search_engine), f, protocol=pickle.HIGHEST_PROTOCOL)
+        if os.name == "nt":
+            os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+            with open(CACHE_FILE, "wb") as f:
+                pickle.dump((indexer, search_engine), f, protocol=pickle.HIGHEST_PROTOCOL)
 
     return indexer, search_engine
 
