@@ -1,0 +1,21 @@
+Query,TFIDF_P@10,BM25F_P@10,TFIDF_NDCG@10,BM25F_NDCG@10
+breakfast pizza,1.0,1.0,0.333,1.0
+quick garlic pasta,0.9,1.0,0.747,0.469
+vegan black bean tacos,0.1,1.0,0.043,0.912
+30 minute chicken stir fry,0.8,1.0,0.481,0.811
+gluten free banana bread,0.8,1.0,0.411,0.894
+dairy free creamy tomato soup,0.3,0.7,0.372,0.681
+easy microwave mug cake,1.0,1.0,1.0,1.0
+vegetarian spinach lasagna,0.3,1.0,0.186,0.93
+spicy honey garlic salmon,1.0,1.0,1.0,1.0
+5 ingredient peanut butter cookies,1.0,1.0,0.956,0.835
+15 minute egg fried rice,0.5,1.0,0.309,0.744
+slow cooker beef chili,1.0,1.0,0.559,0.846
+mediterranean chickpea salad,1.0,1.0,0.773,0.741
+dairy free chocolate chip cookies,0.2,0.8,0.245,0.742
+crispy baked tofu bowl,0.4,0.9,0.354,0.834
+cheesy broccoli potato soup,0.9,1.0,0.603,0.743
+quick avocado toast with egg,0.8,1.0,0.552,1.0
+gluten free pancakes,0.8,1.0,0.82,1.0
+one pot lemon herb chicken,0.8,1.0,0.769,0.501
+vegan lentil curry,0.5,1.0,0.252,0.827
