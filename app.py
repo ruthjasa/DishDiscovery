@@ -2,6 +2,7 @@ import os
 import pickle
 import urllib.request
 import streamlit as st
+import gzip
 from src.indexer import RecipeIndexer
 from src.search_engine import RecipeSearch
 
@@ -69,32 +70,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-DATA_FILE = "data/RAW_recipes.csv"
-CACHE_FILE = "data/search_engine.pkl"
-DATASET_URL = "https://github.com/ruthjasa/DishDiscovery/releases/download/v1.0-data/RAW_recipes.csv"
+
+CACHE_FILE = "data/search_engine.pkl.gz"
+INDEX_URL = "https://github.com/ruthjasa/DishDiscovery/releases/download/data-update/search_engine.pkl.gz"
 
 
 @st.cache_resource
 def init_pipeline():
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "rb") as f:
-            indexer, search_engine = pickle.load(f)
-        return indexer, search_engine
+    if not os.path.exists(CACHE_FILE):
+        os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+        with st.spinner("Loading pre-built search index..."):
+            urllib.request.urlretrieve(INDEX_URL, CACHE_FILE)
 
-    if not os.path.exists(DATA_FILE):
-        os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-        with st.spinner("Downloading recipe dataset from GitHub Release..."):
-            urllib.request.urlretrieve(DATASET_URL, DATA_FILE)
-
-    with st.spinner("Indexing 230k+ recipes for the first time (subsequent launches will take <1s)..."):
-        indexer = RecipeIndexer(DATA_FILE)
-        indexer.load_and_preprocess()
-        search_engine = RecipeSearch(indexer)
-
-        if os.name == "nt":
-            os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
-            with open(CACHE_FILE, "wb") as f:
-                pickle.dump((indexer, search_engine), f, protocol=pickle.HIGHEST_PROTOCOL)
+    with gzip.open(CACHE_FILE, "rb") as f:
+        indexer, search_engine = pickle.load(f)
 
     return indexer, search_engine
 
