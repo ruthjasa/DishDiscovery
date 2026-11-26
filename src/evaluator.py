@@ -1,22 +1,22 @@
 import numpy as np
 import json
 
+
 class IREvaluator:
     """Ruth: IR Metrics (Precision@K, MAP, NDCG)"""
+
     @staticmethod
     def precision_at_k(retrieved_ids: list, relevant_ids: set, k: int = 10) -> float:
-        # TODO: Calculate Precision@K
         if not retrieved_ids or k <= 0:
             return 0.0
 
         top_k_retrieved = retrieved_ids[:k]
         relevant_retrieved = [doc_id for doc_id in top_k_retrieved if doc_id in relevant_ids]
 
-        return len(relevant_retrieved)/k
+        return len(relevant_retrieved) / k
 
     @staticmethod
     def average_precision(retrieved_ids: list, relevant_ids: set) -> float:
-        # calculate average precision for a single query
         if not relevant_ids or not retrieved_ids:
             return 0.0
 
@@ -26,25 +26,24 @@ class IREvaluator:
         for i, doc_id in enumerate(retrieved_ids):
             if doc_id in relevant_ids:
                 hits += 1
-                prec_at_i = hits / (i+1)
+                prec_at_i = hits / (i + 1)
                 sum_precisions += prec_at_i
 
         return sum_precisions / len(relevant_ids) if relevant_ids else 0.0
-    
+
     @staticmethod
     def mean_average_precision(all_retrieved_ids: list[list], all_relevant_ids: list[set]) -> float:
-        # TODO: Calculate MAP
         if not all_retrieved_ids or not all_relevant_ids:
             return 0.0
 
         ap_scores = [
-            IREvaluator.average_precision(ret, rel) for ret, rel in zip(all_retrieved_ids, all_relevant_ids)
+            IREvaluator.average_precision(ret, rel)
+            for ret, rel in zip(all_retrieved_ids, all_relevant_ids)
         ]
-        return float(np.mean(ap_scores) / len(ap_scores)) if ap_scores else 0.0
+        return float(np.mean(ap_scores)) if ap_scores else 0.0
 
     @staticmethod
     def ndcg_at_k(retrieved_ids: list, relevant_scores: dict, k: int = 10) -> float:
-        # TODO: Calculate NDCG@K
         if not retrieved_ids or k <= 0:
             return 0.0
 
@@ -54,15 +53,15 @@ class IREvaluator:
         for i, doc_id in enumerate(top_k):
             rel = relevant_scores.get(str(doc_id), relevant_scores.get(doc_id, 0))
             if rel > 0:
-                dcg += rel / (1.0 if i == 0 else (i+1))
+                dcg += rel / np.log2(i + 2)
 
         ideal_rel = sorted(relevant_scores.values(), reverse=True)[:k]
-        idcg = sum(rel / (1.0 if i == 0 else (i+1)) for i, rel in enumerate(ideal_rel))
+        idcg = sum(rel / np.log2(i + 2) for i, rel in enumerate(ideal_rel))
 
         return float(dcg / idcg) if idcg > 0 else 0.0
 
     @staticmethod
-    def evaluate_search_engine(search_engine, benchmark_file: str = "data/test_queries.json", k: int = 5) -> dict:
+    def evaluate_search_engine(search_engine, benchmark_file: str = "data/test_queries.json", k: int = 10) -> dict:
         with open(benchmark_file, "r") as f:
             test_cases = json.load(f)
 
@@ -77,7 +76,7 @@ class IREvaluator:
             relevance_grades = case.get("relevance_grades", {})
 
             results = search_engine.search(query, top_k=k)
-            
+
             # Extract IDs whether results is a DataFrame, list of dicts, or list of IDs
             if hasattr(results, "empty") and not results.empty:
                 retrieved_ids = results["id"].tolist()
